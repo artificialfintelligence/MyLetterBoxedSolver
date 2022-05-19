@@ -12,7 +12,7 @@ This essentially borrows all of its functionality from three existing projects a
 from ast import Num
 import sys
 
-# The Trie data structure which'll hold our dictionaryof valid words.
+# The Trie data structure which'll hold our dictionary of valid words.
 class Trie(object):
     
     def __init__(self, words: list[str] = None) -> None:
@@ -29,8 +29,8 @@ class Trie(object):
             current_node = current_node[letter]
         # Indicate that this node represents a valid word starting from
         # the root, by adding the 'valid_word' key. Note: In this
-        # implementation, only the existence of the key matters, not the
-        # associated value.
+        # implementation, only the existence of this special key
+        # matters. not the associated value.
         current_node['valid_word'] = True   # Or whatever!
 
     """
@@ -68,6 +68,7 @@ class Puzzle(object):
         self.num_letters = len(self.all_letters)
         self.all_valid_words = list()
         self.all_solutions = list()
+        self.starting_letter_map = dict()
     
     def find_all_words(
             self,
@@ -88,42 +89,51 @@ class Puzzle(object):
                         if query_result == 1:
                             self.all_valid_words.append(candidate)
                         self.find_all_words(candidate, next_side_idx)
+
+    def map_valid_words(self) -> None:
+        for l in self.all_letters:
+            # all_words = self.all_valid_words.copy()
+            self.starting_letter_map[l] = list(filter(
+                    lambda x: x[0] == l, 
+                    self.all_valid_words.copy()))
+    
    
-    def find_all_solutions(
+    def find_solutions(
             self,
-            max_length:int = 100,
+            max_length: int = 10,
             candidate:list[str] = None,
-            letters_covered:set[str] = None) -> None:
+            used_letters:set[str] = None) -> list[list[str]]:
         # Initial word (head of recursion stack):
         if candidate == None:
+            solutions = []
             for w in self.all_valid_words:
-                print(f"Finding solutions starting with {w}...")
-                self.find_all_solutions(max_length, [w], set(w))
+                solutions += self.find_solutions(
+                        max_length,
+                        [w],
+                        set(w))
+                return solutions
         # Recursive call:
         else:
-            for w in self.all_valid_words:
-                if candidate[-1][-1] == w[0] and w not in candidate:
-                    print(f"  {candidate} + {w}?")
-                    new_letters = set()
-                    for letter in w:
-                        if letter not in letters_covered:
-                            new_letters.add(letter)
-                    if len(new_letters) != 0:
-                        candidate.append(w)
-                        letters_covered = letters_covered.union(new_letters)
-                        if len(letters_covered) != self.num_letters:
-                            if len(candidate) < max_length:
-                                self.find_all_solutions(
-                                    max_length,
-                                    candidate, 
-                                    letters_covered)
-                            else:
-                                print(f"  {candidate} abandoned. MAX LENGTH REACHED")
-                                candidate.pop()
-                                return
-                        else:
-                            self.all_solutions.append(candidate.copy())
-                            print(f"FOUND ONE! Adding {candidate} to solutions!!!")
+            # termination criteria
+            if len(used_letters) == self.num_letters:
+                # print(f"Found solution: {candidate}")
+                return [candidate]
+            elif len(candidate) == max_length:
+                return []
+            
+            # last letter of the last word
+            next_letter = candidate[-1][-1]
+            solution = []
+            for next_word in self.starting_letter_map[next_letter]:
+                new_letters = set(next_word) - used_letters
+                if new_letters:
+                    solution += self.find_solutions(
+                        max_length,
+                        candidate + [next_word], used_letters | new_letters)
+            return solution
+
+
+
 
 def main(*args, **kwargs):
     pass
@@ -147,9 +157,13 @@ words = [word.lower() for word in words if len(word)>2]
 dictionary = Trie(words)
 
 # puzzle = Puzzle(dictionary, 'meo-TIB-LKR-ahc')
-max_sol_length = 4
-puzzle = Puzzle(dictionary, 'sma-ilp-tne-ocz')
+# puzzle = Puzzle(dictionary, 'sma-ilp-tne-ocz')
+puzzle = Puzzle(dictionary, 'mrf-sna-opu-gci')
+max_soln_length = 2
 puzzle.find_all_words()
-puzzle.find_all_solutions(max_sol_length)
-print(f"Found {len(puzzle.all_solutions)} solutions of length {max_sol_length} or less!")
+print(f"Found {len(puzzle.all_valid_words)} valid words.")
+puzzle.map_valid_words()
+print(f"Finished mapping valid words by first letter.")
+all_solutions = puzzle.find_solutions(max_soln_length)
+print(f"Found {len(all_solutions)} solutions of length {max_soln_length} or less!")
 pass
