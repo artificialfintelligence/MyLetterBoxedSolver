@@ -12,6 +12,7 @@ This essentially borrows all of its functionality from three existing projects a
 from ast import Num
 import sys
 
+
 # The Trie data structure which'll hold our dictionary of valid words.
 class Trie(object):
     
@@ -53,6 +54,7 @@ class Trie(object):
             else:
                 return 0
 
+
 # The Puzzle class which'll hold puzzle-specific data and methods.
 class Puzzle(object):
 
@@ -66,18 +68,23 @@ class Puzzle(object):
         self.all_letters = list(
             letter for side in self.sides for letter in side)
         self.num_letters = len(self.all_letters)
-        self.all_valid_words = list()
-        self.starting_letter_map = dict()
+        self.all_valid_words = self.find_all_words()
+        self.words_by_1st_letter = self.map_valid_words()
     
     def find_all_words(
             self,
             starting_with:str = None,
-            current_side_idx: int = 0) -> None:
+            current_side_idx: int = 0) -> list[str]:
         if starting_with == None:
+            valid_words = []
             for first_side_idx in range(len(self.sides)):
                 for first_letter in self.sides[first_side_idx]:
-                    self.find_all_words(first_letter, first_side_idx)
+                    valid_words += self.find_all_words(
+                            first_letter,
+                            first_side_idx)
+            return valid_words
         else:
+            valid_words = []
             for next_side_idx in range(len(self.sides)):
                 if next_side_idx != current_side_idx:
                     for letter in self.sides[next_side_idx]:
@@ -86,17 +93,20 @@ class Puzzle(object):
                         if query_result == -1:
                             continue
                         if query_result == 1:
-                            self.all_valid_words.append(candidate)
-                        self.find_all_words(candidate, next_side_idx)
+                            valid_words.append(candidate)
+                        valid_words += self.find_all_words(
+                                candidate, 
+                                next_side_idx)
+            return valid_words
 
-    def map_valid_words(self) -> None:
+    def map_valid_words(self) -> dict:
+        valid_words_map = {}
         for l in self.all_letters:
-            # all_words = self.all_valid_words.copy()
-            self.starting_letter_map[l] = list(filter(
+            valid_words_map[l] = list(filter(
                     lambda x: x[0] == l, 
                     self.all_valid_words.copy()))
-    
-   
+        return valid_words_map
+
     def find_solutions(
             self,
             max_length: int = 10,
@@ -123,7 +133,7 @@ class Puzzle(object):
             # last letter of the last word
             next_letter = candidate[-1][-1]
             solution = []
-            for next_word in self.starting_letter_map[next_letter]:
+            for next_word in self.words_by_1st_letter[next_letter]:
                 new_letters = set(next_word) - used_letters
                 if new_letters:
                     solution += self.find_solutions(
@@ -131,8 +141,6 @@ class Puzzle(object):
                         candidate + [next_word], 
                         used_letters | new_letters)
             return solution
-
-
 
 
 def main(*args, **kwargs):
@@ -145,27 +153,15 @@ if __name__ == '__main__':
     #         **dict(arg.split('=') for arg in sys.argv[3:])) # kwargs
     pass
 
-
-
-
 # First, we create our dictionary of all valid words.
-f = open('words.txt', 'r')
+f = open('dict_M.txt', 'r')
 words = f.read().strip().split('\n')
 words = [word.lower() for word in words if len(word)>2]
-
+f.close()
 
 dictionary = Trie(words)
-
-# puzzle = Puzzle(dictionary, 'meo-TIB-LKR-ahc')
-# puzzle = Puzzle(dictionary, 'sma-ilp-tne-ocz')
 puzzle = Puzzle(dictionary, 'mrf-sna-opu-gci')
 max_soln_length = 2
-puzzle.find_all_words()
-print(f"Found {len(puzzle.all_valid_words)} valid words.")
-puzzle.map_valid_words()
-print(f"Finished mapping valid words by first letter.")
+
 all_solutions = puzzle.find_solutions(max_soln_length)
-print(f"Found {len(all_solutions)} solutions of length {max_soln_length} or less!")
-for soln in all_solutions:
-    print(soln)
-pass
+print(f"Found {len(all_solutions)} solutions of length {max_soln_length} or less.")
