@@ -184,7 +184,8 @@ def main(**kwargs):
             return
     puzzle = Puzzle(dictionary, puzzle_string)
 
-    print(f"\Solving {puzzle_string}...")
+    print(f"\nFound {len(puzzle.all_valid_words)} valid words.")
+    print(f"\nSolving {puzzle_string}...")
     all_solutions = puzzle.find_solutions(max_soln_length)
     print(f"\nFound {len(all_solutions)} solutions of length {max_soln_length} or less.")
 
@@ -199,13 +200,13 @@ def main(**kwargs):
         for solution in all_solutions:
             f.write(f'{solution}\n')
         f.close()
-    else:
+    elif len(all_solutions) != 0:
         show_output = input('\nOutput file not specified. Output all solutions to the terminal? (y/N): ') or 'n'
         while show_output.lower() not in {'y', 'n'}:
             show_output = input('Output all solutions to the terminal? (y/N): ') or 'n'
         if show_output.lower() == 'y':
             for solution in all_solutions:
-                    print(f'{solution}\n')
+                    print(f'{solution}')
 
 if __name__ == '__main__':
     # Parse command line arguments and invoke main() accordingly
