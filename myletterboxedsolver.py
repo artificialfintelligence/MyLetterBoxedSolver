@@ -67,7 +67,6 @@ class Puzzle(object):
             letter for side in self.sides for letter in side)
         self.num_letters = len(self.all_letters)
         self.all_valid_words = list()
-        self.all_solutions = list()
         self.starting_letter_map = dict()
     
     def find_all_words(
@@ -111,7 +110,7 @@ class Puzzle(object):
                         max_length,
                         [w],
                         set(w))
-                return solutions
+            return solutions
         # Recursive call:
         else:
             # termination criteria
@@ -129,7 +128,8 @@ class Puzzle(object):
                 if new_letters:
                     solution += self.find_solutions(
                         max_length,
-                        candidate + [next_word], used_letters | new_letters)
+                        candidate + [next_word], 
+                        used_letters | new_letters)
             return solution
 
 
@@ -149,7 +149,7 @@ if __name__ == '__main__':
 
 
 # First, we create our dictionary of all valid words.
-f = open('words_small.txt', 'r')
+f = open('words.txt', 'r')
 words = f.read().strip().split('\n')
 words = [word.lower() for word in words if len(word)>2]
 
@@ -166,4 +166,6 @@ puzzle.map_valid_words()
 print(f"Finished mapping valid words by first letter.")
 all_solutions = puzzle.find_solutions(max_soln_length)
 print(f"Found {len(all_solutions)} solutions of length {max_soln_length} or less!")
+for soln in all_solutions:
+    print(soln)
 pass
