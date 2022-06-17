@@ -155,14 +155,14 @@ def main(**kwargs):
         dict_file_path = kwargs["--dict"]
     else:
         dict_file_path = "resources/dict_S.txt"
+    print(f"Using {dict_file_path} as dictionary...")
     try:
-        f = open(dict_file_path, "r")
-        words = f.read().strip().split("\n")
-        words = [word.lower() for word in words if len(word) > 2]
+        with open(dict_file_path, "r") as f:
+            words = f.read().strip().split("\n")
+            words = [word.lower() for word in words if len(word) > 2]
     except Exception as e:
         print(f"Failed to open dictionary file {dict_file_path}:\n {e}")
         return
-    f.close()
     dictionary = Trie(words)
 
     if "--puzzle" in kwargs:
@@ -176,10 +176,10 @@ def main(**kwargs):
         except:
             print(f"Failed to fetch today's puzzle from the NYT website.")
             return
+    print(f"\nSolving {puzzle_string}...")
     puzzle = Puzzle(dictionary, puzzle_string)
 
     print(f"\nFound {len(puzzle.all_valid_words)} valid words.")
-    print(f"\nSolving {puzzle_string}...")
     all_solutions = puzzle.find_solutions(max_soln_length)
     print(
         f"\nFound {len(all_solutions)} solutions of length {max_soln_length} or less."
