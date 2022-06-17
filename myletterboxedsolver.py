@@ -155,7 +155,7 @@ def main(**kwargs):
         dict_file_path = kwargs["--dict"]
     else:
         dict_file_path = "resources/dict_S.txt"
-    print(f"Using {dict_file_path} as dictionary...")
+    print(f"\nUsing {dict_file_path} as dictionary...")
     try:
         with open(dict_file_path, "r") as f:
             words = f.read().strip().split("\n")
@@ -171,8 +171,9 @@ def main(**kwargs):
             print(f"Invalid puzzle string: {puzzle_string}")
             return
     else:
+        print("\nFetching today's puzzle...")
         try:
-            puzzle_string = puzzle_fetcher.fetch()
+            puzzle_string, default_solution = puzzle_fetcher.fetch()
         except:
             print(f"Failed to fetch today's puzzle from the NYT website.")
             return
@@ -210,6 +211,20 @@ def main(**kwargs):
         if show_output.lower() == "y":
             for solution in all_solutions:
                 print(f"{solution}")
+    
+    if "--puzzle" not in kwargs:
+        show_default_solution = (
+            input(
+                "\nDisplay NYT's default solution? (y/N): "
+            )
+            or "n"
+        )
+        while show_default_solution.lower() not in {"y", "n"}:
+            show_output = (
+                input("Display NYT's default solution? (y/N): ") or "n"
+            )
+        if show_default_solution.lower() == "y":
+            print(f"NYT's own solution was: {default_solution}")
 
 
 if __name__ == "__main__":
