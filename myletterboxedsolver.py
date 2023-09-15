@@ -211,13 +211,10 @@ def main(**kwargs):
         if show_output.lower() == "y":
             for solution in all_solutions:
                 print(f"{solution}")
-    
+
     if "--puzzle" not in kwargs:
         show_default_solution = (
-            input(
-                "\nDisplay NYT's default solution? (y/N): "
-            )
-            or "n"
+            input("\nDisplay NYT's default solution? (y/N): ") or "n"
         )
         while show_default_solution.lower() not in {"y", "n"}:
             show_output = (
@@ -230,22 +227,22 @@ def main(**kwargs):
 if __name__ == "__main__":
     # Parse command line arguments and invoke main() accordingly
     usage_guide = f"""
-            Usage: myletterboxedsolver [--option <value>] 
-            
+            Usage: myletterboxedsolver [--option <value>]
+
             Where:
-            
+
             --puzzle <abc-def-ghi-jkl>
             Solves the provided puzzle (must contain at least one
             hyphen). If ommitted, will attempt to retrieve today's
             puzzle from the NYT website.
-            
+
             --len <M>
             Limits solutions to those with a maximum of M guesses.
             (Default = 2)
-            
+
             --dict <path_to_dictionary_file>
             Uses the provided dictionary of valid words. (Note: Words
-            shorter than 3 letters will be ignored). 
+            shorter than 3 letters will be ignored).
             (default = resources/dict_S.txt)
 
             --output <path_to_output_file>
@@ -261,6 +258,8 @@ if __name__ == "__main__":
     valid_keys = list(map(lambda x: "--" + x, valid_options))
     values = args[1::2]
     keys = args[::2]
+    if len(args) == 0:
+        print("Run with the --help flag to get help on how to use this app")
     if len(args) % 2 != 0:
         print(usage_guide)
     else:
@@ -270,4 +269,3 @@ if __name__ == "__main__":
                 break
         else:
             main(**dict(zip(keys, values)))
-    pass
